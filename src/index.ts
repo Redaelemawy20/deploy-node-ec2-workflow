@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.get("/", (req: Request, res: Response) => {
   res.json({
-    message: "Welcome to Posts API by Reda",
+    message: "Welcome to Posts API",
     endpoints: {
       "GET /api/posts": "Get all posts",
       "GET /api/posts/:id": "Get post by ID",
