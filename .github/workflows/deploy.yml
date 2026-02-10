@@ -1,0 +1,31 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # APP_DIR = folder name under home (e.g. node-sqlite-api or deploy-node-ec2-workflow)
+            # Set vars.APP_DIR and vars.BRANCH in repo Settings → Secrets and variables → Actions if different
+            cd /home/${{ secrets.EC2_USERNAME }}/${{ vars.APP_DIR || 'node-sqlite-api' }}
+            git pull origin ${{ vars.BRANCH || 'master' }}
+            pnpm install --prod
+            pnpm run build
+            pm2 restart node-sqlite-api || pm2 start dist/index.js --name node-sqlite-api
