@@ -9,11 +9,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -26,6 +26,6 @@ jobs:
             # Set vars.APP_DIR and vars.BRANCH in repo Settings → Secrets and variables → Actions if different
             cd /home/${{ secrets.EC2_USERNAME }}/${{ vars.APP_DIR || 'node-sqlite-api' }}
             git pull origin ${{ vars.BRANCH || 'master' }}
-            pnpm install --prod
+            pnpm install
             pnpm run build
             pm2 restart node-sqlite-api || pm2 start dist/index.js --name node-sqlite-api
