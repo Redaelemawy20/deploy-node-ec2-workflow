@@ -1,6 +1,8 @@
 import Database from 'better-sqlite3';
+import path from 'path';
 
-const db = new Database('./database.sqlite');
+const dbPath = process.env.DB_PATH ?? path.join(process.cwd(), 'database.sqlite');
+const db = new Database(dbPath);
 console.log('Connected to SQLite database');
 
 // Set pragmas for better performance
