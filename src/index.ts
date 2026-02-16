@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.get("/", (req: Request, res: Response) => {
   res.json({
-    message: "Welcome to Posts API",
+    message: "Welcome to Posts API from docker",
     endpoints: {
       "GET /api/posts": "Get all posts",
       "GET /api/posts/:id": "Get post by ID",
