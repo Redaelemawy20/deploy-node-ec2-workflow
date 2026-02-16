@@ -1,0 +1,52 @@
+name: Build and Deploy (Docker)
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: redaelemawy20
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            redaelemawy20/node-sqlite-api:latest
+            redaelemawy20/node-sqlite-api:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            sudo docker pull redaelemawy20/node-sqlite-api:latest
+            sudo docker stop node-sqlite-api 2>/dev/null || true
+            sudo docker rm node-sqlite-api 2>/dev/null || true
+            sudo docker run -d -p 3000:3000 \
+              -v /home/ubuntu/data:/app/data \
+              --name node-sqlite-api --restart unless-stopped \
+              redaelemawy20/node-sqlite-api:latest
